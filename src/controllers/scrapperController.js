@@ -4,7 +4,7 @@ import fs                       from 'fs'
 
 export const scrapperController = {
 
-    async GET_dashboard(request, response) {
+    async getArticlesList(request, response) {
         let cachePath = await jsonCache.getMostRecentFile('articles')
         let articlesBrut = JSON.parse(fs.readFileSync(`${jsonCache.path}articles/${cachePath}`))
 
@@ -19,7 +19,15 @@ export const scrapperController = {
                     model: articleBrut.model,
                     img: articleBrut.img,
                     url: articleBrut.url,
-                    sizes: articleBrut.sizes
+                    sizes: articleBrut.sizes,
+                    sold_out: articleBrut.sold_out
+                }
+                if (articles.find(e => {
+                    return ((e.name === articleBrut.name) && (e.sold_out === false))
+                }) === undefined) {
+                    articleData.isFullSoldOut = true
+                } else {
+                    articleData.isFullSoldOut = true
                 }
                 articleData.models.push(model)
             } else {
@@ -32,7 +40,9 @@ export const scrapperController = {
                         model: articleBrut.model,
                         img: articleBrut.img,
                         url: articleBrut.url,
-                        sizes: articleBrut.sizes
+                        sizes: articleBrut.sizes,
+                        sold_out: articleBrut.sold_out,
+                        isFullSoldOut: articleBrut.sold_out ? true : false
                     })
                 }
                 articles.push(article)

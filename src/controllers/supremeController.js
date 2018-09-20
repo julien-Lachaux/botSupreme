@@ -3,7 +3,7 @@ import { jsonCache } from '@julien-lachaux/jsoncache'
 
 export const supremeController = {
 
-    async getSupremeArticles() {
+    async getArticlesList() {
        console.log('init scrapping')
        webScrapper.setUrl('https://www.supremenewyork.com/shop/all')
        await webScrapper.init()
@@ -29,16 +29,17 @@ export const supremeController = {
    
            let articleName = await webScrapper.getElementData(articleDetail, 'h1.protect')
            let articleModel = await webScrapper.getElementData(articleDetail, 'p[itemprop="model"]')
-   
+           let articleCategory = articleUrl.split('/')[4]
+
            if (articleSoldOut !== undefined) {
                var article = {
                    name:       articleName,
                    model:      articleModel,
                    img:        articleImg,
                    url:        articleUrl,
+                   category:   articleCategory,
                    sold_out:   true
                }
-               await webScrapper.destroySub()
            } else {
                
                let articleDescription = await webScrapper.getElementData(articleDetail, 'p[itemprop="description"]')
@@ -61,26 +62,25 @@ export const supremeController = {
                    articleSizes.push('Unique')
                }
        
-               await webScrapper.destroySub()
-       
                var article = {
                    name:           articleName,
+                   category:       articleCategory,
                    model:          articleModel,
                    description:    articleDescription,
                    url:            articleUrl,
                    img:            articleImg,
                    price:          articlePrice,
                    priceUnit:      articlePriceUnit,
-                   sizes :         articleSizes
+                   sizes :         articleSizes,
+                   sold_out:       false
                }
            }
-   
+           await webScrapper.destroySub()
            result.push(article)
            article = {}
        }
    
         await webScrapper.end()
-   
         await jsonCache.write(result, 'articles')
    
        return result

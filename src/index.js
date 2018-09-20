@@ -12,8 +12,11 @@ app.set('views', 'src/views/')
 app.use('/public', express.static('public'));
 
 app.get('/', (request, response) => {
-  response.redirect('/scrapper/supreme-dashboard')
+  response.redirect('/scrapper/articlesList')
 })
+
+let pagesRoutes = require('./routes/pages.js')
+app.use('/supreme', pagesRoutes)
 
 let scrapperRoute = require('./routes/scrapper.js')
 app.use('/scrapper', scrapperRoute)
