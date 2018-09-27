@@ -1,8 +1,7 @@
 module.exports = {
     mode: 'development',
     entry : {
-        'js/index.js': './public/assets/src/js/index.js',
-        'css/style.css': './public/assets/src/scss/defaultStyle.scss'
+        'js/index.js': './public/assets/src/js/index.js'
     },
     output : {
         path: __dirname+'/public/assets/build/',

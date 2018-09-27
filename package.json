@@ -5,8 +5,8 @@
   "main": "build/index.js",
   "scripts": {
     "clean": "rm -rf build && mkdir build",
-    "build-babel": "babel -d ./build ./src && babel -d ./public/assets/js/build ./public/assets/js/src",
-    "dev": "babel-node src/index.js",
+    "build-babel": "babel -d ./build ./src && babel -d ./public/assets/build/js ./public/assets/src/js && babel -d ./public/assets/build/css ./public/assets/src/scss",
+    "dev": "nodemon --exec babel-node src/index.js",
     "devFront": "webpack --watch",
     "build": "npm run clean && npm run build-babel",
     "start": "node ./build/index.js",
@@ -33,6 +33,7 @@
     "file-loader": "^2.0.0",
     "mustache-express": "^1.2.7",
     "node-cron": "^2.0.1",
+    "nodemon": "^1.18.4",
     "sass-loader": "^7.1.0"
   },
   "devDependencies": {

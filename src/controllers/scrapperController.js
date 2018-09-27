@@ -8,6 +8,7 @@ export const scrapperController = {
         let cachePath = await jsonCache.getMostRecentFile('articles')
         let articlesBrut = JSON.parse(fs.readFileSync(`${jsonCache.path}articles/${cachePath}`))
 
+        var categories = []
         var articles = []
 
         articlesBrut.forEach(articleBrut => {
@@ -33,6 +34,7 @@ export const scrapperController = {
             } else {
                 let article = {
                     name: articleBrut.name,
+                    category: articleBrut.category,
                     sold_out: articleBrut.sold_out,
                     price: articleBrut.price,
                     priceUnit: articleBrut.priceUnit,
@@ -45,21 +47,38 @@ export const scrapperController = {
                         isFullSoldOut: articleBrut.sold_out ? true : false
                     })
                 }
+
+                let category = categories.find(e => {
+                    return e.name === article.category
+                })
+                if (category === undefined) {
+                    categories.push({
+                        name: article.category,
+                        articles: []
+                    })
+                }
                 articles.push(article)
             }
         })
 
+        categories.forEach(element => {
+            console.log(element)
+            element.articles = articles.filter(e => {
+                return e.category === element.name
+            })
+        });
+
         let data = {
-            articles
+            categories: categories
         }
 
-        console.log(articles.length)
+        console.log(categories.length)
 
-        response.render('dashboard', data)
+        response.render('components/articlesList', data)
     },
 
     async GET_manualScrapping(request, response) {
-        supremeController.getSupremeArticles()
-        response.render('manualScrapping', {})
+        supremeController.getArticlesList()
+        response.render('components/manualReload', {})
     }
 }

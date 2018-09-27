@@ -12,7 +12,7 @@ app.set('views', 'src/views/')
 app.use('/public', express.static('public'));
 
 app.get('/', (request, response) => {
-  response.redirect('/scrapper/articlesList')
+  response.redirect('/supreme/articlesList')
 })
 
 let pagesRoutes = require('./routes/pages.js')
