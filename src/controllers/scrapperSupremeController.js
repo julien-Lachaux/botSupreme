@@ -4,14 +4,14 @@ import { jsonCache } from '@julien-lachaux/jsoncache'
 export const supremeController = {
 
     async getArticlesList() {
-       console.log('init scrapping')
+       console.log('init scrapping articles')
        webScrapper.setUrl('https://www.supremenewyork.com/shop/all')
        await webScrapper.init()
        let supremeArticles = await webScrapper.getElementsArray('#container article')
    
        let result = []
        for (let i=0; i < supremeArticles.length; i++) {
-           console.log('article ' + (i + 1) + ' on ' + (supremeArticles.length + 1) + '\r')
+           console.log('article ' + (i + 1) + ' on ' + supremeArticles.length + '\r')
            let articleUrl = await webScrapper.getElementData(supremeArticles[i], '.inner-article a', 'href')
            let articleImg = await webScrapper.getElementData(supremeArticles[i], '.inner-article img', 'src')
            
@@ -85,4 +85,10 @@ export const supremeController = {
    
        return result
    }
+
+    async getDropsList() {
+        console.log('init scrapping drops')
+       webScrapper.setUrl('https://www.supremenewyork.com/shop/all')
+       await webScrapper.init()
+    }
 }

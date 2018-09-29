@@ -1,10 +1,10 @@
-import { supremeController }    from './supremeController';
-import { jsonCache }            from '@julien-lachaux/jsoncache'
-import fs                       from 'fs'
+import { scrapperSupremeController }    from './scrapperSupremeController';
+import { jsonCache }                    from '@julien-lachaux/jsoncache'
+import fs                               from 'fs'
 
-export const scrapperController = {
+export const displaySupremeController = {
 
-    async getArticlesList(request, response) {
+    async GET_ArticlesList(request, response) {
         let cachePath = await jsonCache.getMostRecentFile('articles')
         let articlesBrut = JSON.parse(fs.readFileSync(`${jsonCache.path}articles/${cachePath}`))
 
@@ -63,6 +63,56 @@ export const scrapperController = {
 
         categories.forEach(element => {
             console.log(element)
+            switch (element.name) {
+                case 'jackets':
+                    element.icon = 'Coat'
+                    element.default = true
+                    break;
+
+                case 'shirts':
+                    element.icon = 'Polo-Shirt'
+                    break;
+
+                case 'tops-sweaters':
+                    element.icon = 'Blouse'
+                    break;
+
+                case 'sweatshirts':
+                    element.icon = 'Hoodie'
+                    break;
+
+                case 'pants':
+                    element.icon = 'Jeans'
+                    break;
+
+                case 'shorts':
+                    element.icon = 'Short-Pants'
+                    break;
+
+                case 't-shirts':
+                    element.icon = 'T-Shirt'
+                    break;
+
+                case 'hats':
+                    element.icon = 'Cap-2'
+                    break;
+
+                case 'bags':
+                    element.icon = 'Bag'
+                    break;
+
+                case 'accessories':
+                    element.icon = 'Sunglasses'
+                    break;
+
+                case 'skate':
+                    element.icon = 'Skateboard-2'
+                    break;
+
+                case 'shoes':
+                    element.icon = 'Shoes'
+                    break;
+            }
             element.articles = articles.filter(e => {
                 return e.category === element.name
             })
@@ -78,7 +128,7 @@ export const scrapperController = {
     },
 
     async GET_manualScrapping(request, response) {
-        supremeController.getArticlesList()
+        scrapperSupremeController.getArticlesList()
         response.render('components/manualReload', {})
     }
 }

@@ -1,8 +1,8 @@
-import { scrapperController }   from './../controllers/scrapperController'
+import { displaySupremeController }   from './../controllers/displaySupremeController'
 import express                  from 'express'
 
 let router = express.Router()
-router.get('/get_articlesList', scrapperController.getArticlesList)
-router.get('/get_manualScrapping', scrapperController.GET_manualScrapping)
+router.get('/get_articlesList', displaySupremeController.GET_ArticlesList)
+router.get('/get_manualScrapping', displaySupremeController.GET_manualScrapping)
 
 module.exports = router
