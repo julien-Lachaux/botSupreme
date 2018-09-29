@@ -84,11 +84,11 @@ export const supremeController = {
         await jsonCache.write(result, 'articles')
    
        return result
-   }
+   },
 
     async getDropsList() {
         console.log('init scrapping drops')
-       webScrapper.setUrl('https://www.supremenewyork.com/shop/all')
+       webScrapper.setUrl('https://www.supremecommunity.com/season/fall-winter2018/droplists/')
        await webScrapper.init()
     }
 }
