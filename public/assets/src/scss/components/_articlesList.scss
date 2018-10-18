@@ -141,6 +141,10 @@ h2 {
     height: 3em;
 }
 
+.article .infoPlus {
+    width: 100%;
+}
+
 .article .name {
     width: 100%;
     display: block;
@@ -184,4 +188,23 @@ h2 {
 .article .model .thumbnail img {
     width: 100%;
     height: auto;
+}
+
+.article .thumbnail {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    margin: 1em auto;
+}
+
+.article .thumbnail img {
+    width: 90%;
+    height: auto;
+}
+
+.article .ajoutPanier {
+    position: absolute;
+    bottom: 1em;
+    transform: translateX(-50%);
 }

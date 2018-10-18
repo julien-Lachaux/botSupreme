@@ -1,7 +1,11 @@
 import './../scss/defaultStyle.scss';
-const app = require('./components/app')
+const app       = require('./components/app')
+const panier    = require('./components/panier')
 
 var currentPage = app.getCurrentPage()
-app.get(`/scrapper/get_${currentPage}`, (response) => {
+app.get(`/widgets/get_${currentPage}`, (response) => {
     $('.content').html(response)
+    $('.ajoutPanier').each((element) => {
+        element.onclick = panier.addArticle(element.getAttribute(id))
+    })
 })

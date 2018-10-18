@@ -18,8 +18,8 @@ app.get('/', (request, response) => {
 let pagesRoutes = require('./routes/pages.js')
 app.use('/supreme', pagesRoutes)
 
-let scrapperRoute = require('./routes/scrapper.js')
-app.use('/scrapper', scrapperRoute)
+let widgetsRoute = require('./routes/widgets.js')
+app.use('/widgets', widgetsRoute)
 
 app.listen(port, function() {
     console.log('App listening on port ' + port)

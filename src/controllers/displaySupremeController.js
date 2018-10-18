@@ -128,7 +128,16 @@ export const displaySupremeController = {
     },
 
     async GET_manualScrapping(request, response) {
-        scrapperSupremeController.getArticlesList()
+        //await scrapperSupremeController.getArticlesList()
+        await scrapperSupremeController.getDropsList()
+
         response.render('components/manualReload', {})
+    },
+
+    async GET_DropsArticle(request, response) {
+        let cachePath   = await jsonCache.getMostRecentFile('drops')
+        let drops       = JSON.parse(fs.readFileSync(`${jsonCache.path}drops/${cachePath}`))
+        
+        response.render('components/drops', { drops: drops })
     }
 }

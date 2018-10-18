@@ -1,0 +1,34 @@
+<nav class="sommaire position-fixed">
+    <ul id="categoriesTablist" role="tablist" class="list-group">
+        {{#drops}}
+            <li class="catogoryLink"><a data-toggle="list" role="tab" aria-controls="list-{{ weekNumber }}" href="#list-{{ weekNumber }}" id="list-{{ weekNumber }}-list" class="{{#latest}}active{{/latest}}">{{ weekNumber }}</a></li>
+        {{/drops}}
+    </ul>
+</nav>
+
+<div class="subContent tab-content" id="categoriesTabContent">
+    {{#drops}}
+        <div class="articlesArea tab-pane fade {{#latest}}show active{{/latest}}" id="list-{{ weekNumber }}" role="tabpanel" aria-labelledby="list-{{ weekNumber }}-list">
+            <h2 id="{{ name }}">{{ name }}</h2>
+            <div class="articles">
+                {{#articles}}
+                    <div class="article">
+                        <div class="thumbnail"><img src="{{ img }}" alt=""></div>
+                        <div class="articleInfo">
+                            <div class="infoPlus">
+                                <div class="category">{{ category }}</div>
+                                <div class="name">{{ name }}</div>
+                                <div class="price euros">{{ price.euros }} €</div>
+                                <div class="like">
+                                    <div class="ratio"><span class="badge badge-primary">{{ like.ratio }} % de votes positif</span></div>
+                                    <div class="chiffre"><span class="badge badge-success">{{ like.positive }}</span>&nbsp;<span class="badge badge-danger">{{ like.negative }}</span></div>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary ajoutPanier" id="{{ id }}">Ajouter au panier</button>
+                            </div>
+                        </div>
+                    </div>
+                {{/articles}}
+            </div>
+        </div>
+    {{/drops}}
+</div>

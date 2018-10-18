@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -rf build && mkdir build",
     "build-babel": "babel -d ./build ./src && babel -d ./public/assets/build/js ./public/assets/src/js && babel -d ./public/assets/build/css ./public/assets/src/scss",
-    "dev": "nodemon --exec babel-node src/index.js",
+    "devApi": "nodemon --ignore 'data/*' --exec babel-node src/index.js",
     "devFront": "webpack --watch",
     "build": "npm run clean && npm run build-babel",
     "start": "node ./build/index.js",
@@ -25,7 +25,7 @@
   "homepage": "https://github.com/julien-Lachaux/botSupreme#readme",
   "dependencies": {
     "@julien-lachaux/jsoncache": "^1.0.2",
-    "@julien-lachaux/webscrapper": "^1.0.5",
+    "@julien-lachaux/webscrapper": "^1.0.6",
     "css-loader": "^1.0.0",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
