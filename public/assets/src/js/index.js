@@ -5,7 +5,5 @@ const panier    = require('./components/panier')
 var currentPage = app.getCurrentPage()
 app.get(`/widgets/get_${currentPage}`, (response) => {
     $('.content').html(response)
-    $('.ajoutPanier').each((element) => {
-        element.onclick = panier.addArticle(element.getAttribute(id))
-    })
+    panier.activePanier()
 })

@@ -208,3 +208,19 @@ h2 {
     bottom: 1em;
     transform: translateX(-50%);
 }
+
+.panierBtn {
+    background: #dd1300;
+}
+
+.alert {
+    top: 4em;
+}
+
+.lignePanier-action span:hover {
+    color: #ff1500 !important;
+}
+
+.zindex-modal {
+    z-index: 1050 !important;
+}

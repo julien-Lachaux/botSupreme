@@ -140,4 +140,5 @@ export const displaySupremeController = {
         
         response.render('components/drops', { drops: drops })
     }
+    
 }

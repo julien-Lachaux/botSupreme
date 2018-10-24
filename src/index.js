@@ -21,7 +21,7 @@ app.use('/supreme', pagesRoutes)
 let widgetsRoute = require('./routes/widgets.js')
 app.use('/widgets', widgetsRoute)
 
-app.listen(port, function() {
+app.listen(port, () => {
     console.log('App listening on port ' + port)
 })
 
