@@ -17,11 +17,26 @@ export const Panier = {
 
     getSize() {
         var panier = []
+        
         if (this.checkIfExist()) {
             panier = JSON.parse(fs.readFileSync(this.path))
         }
 
         return panier.length
+    },
+
+    getTotalPrice() {
+        var panier      = JSON.parse(fs.readFileSync(this.path))
+        var total       = 0
+
+        if (this.checkIfExist()) {
+
+            panier.forEach(article => {
+                total += parseInt(article.price.euros)
+            })
+        }
+
+        return total
     },
 
     getPanier() {
@@ -109,7 +124,7 @@ export const Panier = {
         if (this.checkIfExist()) {
             let testIfArticleExist = JSON.parse(fs.readFileSync(this.path)).filter(element => element.id === id)
 
-            return (testIfArticleExist.length === 0) ? true : false
+            return (testIfArticleExist.length === 0) ? false : true
         }
 
         return false

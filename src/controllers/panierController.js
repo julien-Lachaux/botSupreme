@@ -12,6 +12,16 @@ export const panierController = {
         response.send(JSON.stringify({ panier: { size: size } }))
     },
 
+    async GET_totalPricePanier(request, response) {
+        var totalPrice = 0
+
+        if (Panier.checkIfExist()) {
+            totalPrice = Panier.getTotalPrice()
+        }
+        
+        response.send(JSON.stringify({ panier: { total: totalPrice } }))
+    },
+
     async GET_Panier(request, response) {
         var data = {}
 
@@ -52,8 +62,8 @@ export const panierController = {
     },
 
     async GET_removeArticle(request, response) {
-        var success = false
-        var articleId = request.param('id')
+        var success     = false
+        var articleId   = request.params.id
 
         if (Panier.checkIfExist()) {
             if (Panier.removeArticle(articleId)) {

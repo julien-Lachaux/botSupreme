@@ -65,13 +65,14 @@ h2 {
 .content {
     position: absolute;
     width: 100%;
-    height: calc(100% - 3.5rem);
-    top: 3.5rem;
+    height: calc(100% - 4.4rem);
+    top: 4.4rem;
+    z-index: 1;
 }
 
 .subContent {
     height: 100%;
-    padding: 2rem .5rem 5rem .5rem;
+    padding: 2rem 5rem 5rem 5rem;
 }
 
 .articlesArea {
@@ -213,8 +214,28 @@ h2 {
     background: #dd1300;
 }
 
-.alert {
-    top: 4em;
+.modals {
+    z-index: 1050;
+    position: absolute;
+    width: 100%;
+}
+
+.alertes {
+    z-index: 1250;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 4em 0 0 0;
+    overflow: hidden;
+
+    .alert {
+        display: inline-block !important;
+        margin: .25em 1em;
+    }
 }
 
 .lignePanier-action span:hover {

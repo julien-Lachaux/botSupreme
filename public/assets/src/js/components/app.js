@@ -22,10 +22,10 @@ const app = {
      * @param {object} data data envoyé avec la requete POST
      * @param {function} callback fonction de callback
      */
-    post(url, data, callback = () => {}) {
+    post(url, data, callback = () => {}, dataTpe = 'json') {
         $.post(url, data, (response) => {
             callback(response)
-        })
+        }, dataTpe)
     },
 
     /**
@@ -33,10 +33,10 @@ const app = {
      * @description serialize un formulaire en un tableau clé - valeur
      * @param {string} form selecteur css pour cibler le formulaire a serializer
      */
-    serializeForm(form) {
+    serializeForm(form, champAttr = 'name') {
         var formData = {}
         $(form).find('.form-control').each((key, input) => {
-            let champ = $(input).attr('name')
+            let champ = $(input).attr(champAttr)
             let valeur = $(input).val()
             formData[champ] = valeur
         });

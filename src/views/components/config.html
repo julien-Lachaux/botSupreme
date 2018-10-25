@@ -1,0 +1,85 @@
+<h2 class="text-center mt-5">Configuration du bot</h2>
+<div class="row mt-5">
+    <div class="col col-md-8 offset-2">
+        <form id="configForm" method="POST" action="">
+            <input type="text" class="form-control" id="id" placeholder="Nom" value="{{ config.id }}" hidden>
+            <h4 class="mb-2">Informations de livraison</h4>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="nom">Nom</label>
+                    <input type="text" class="form-control" id="nom" placeholder="Nom" value="{{ config.nom }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="prenom">Prenom</label>
+                    <input type="text" class="form-control" id="prenom" placeholder="Prenom" value="{{ config.prenom }}" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Email" value="{{ config.email }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="tel">Tel.</label>
+                    <input type="tel" class="form-control" id="tel" placeholder="Telephone" value="{{ config.tel }}" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="rue">Adresse</label>
+                <input type="text" class="form-control" id="rue" placeholder="1234 Main St" value="{{ config.livraison.adresse }}" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="complement_1">Complément d'adresse</label>
+                    <input type="text" class="form-control" id="complement_1" placeholder="Apartment, studio, or floor" value="{{ config.livraison.complement_1 }}">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="complement_2">Complément d'adresse 2</label>
+                    <input type="text" class="form-control" id="complement_2" placeholder="Apartment, studio, or floor" value="{{ config.livraison.complement_2 }}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="ville">Ville</label>
+                    <input type="text" class="form-control" id="ville" value="{{ config.livraison.ville }}" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="pays">Pays</label>
+                    <select id="pays" class="form-control" value="{{ config.livraison.pays }}" required>
+                        <option selected="selected">Choose...</option>
+                        <option>...</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="code_postal">Code postal</label>
+                    <input type="text" class="form-control" id="code_postal" value="{{ config.livraison.code_postal }}" required>
+                </div>
+            </div>
+            <h4 class="mt-3 mb-2">Moyen de paiement</h4>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="typeCB">Type de carte bancaire</label>
+                    <select id="typeCB" class="form-control" value="{{ config.CB.typeCB }}" required>
+                        <option selected="selected">Visa</option>
+                        <option>Mastercard</option>
+                        <option>Maestro</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="exp_mois">Date d'expiration</label>
+                    <input type="month" class="form-control" id="exp_mois" value="{{ config.CB.exp_annee }}-{{ config.CB.exp_mois }}" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="numero">Numéro</label>
+                <input type="text" class="form-control" id="numero" value="{{ config.CB.numero }}" required>
+            </div>
+            <div class="form-group">
+                <label for="numero">Visuel</label>
+                <input type="text" class="form-control" id="visuel" value="{{ config.CB.visuel }}" required>
+            </div>
+            <a href="/" role="button" class="btn btn-outline-danger">Annuler</a>
+            <button type="submit" class="btn btn-primary">Sauvegarder les paramètres</button>
+        </form>
+    </div>
+</div>

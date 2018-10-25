@@ -1,6 +1,7 @@
-import { scrapperSupremeController }    from './scrapperSupremeController';
-import { jsonCache }                    from '@julien-lachaux/jsoncache'
-import fs                               from 'fs'
+import { scrapperSupremeController }   from './scrapperSupremeController';
+import { Config }                       from './../class/Config';
+import { jsonCache }                   from '@julien-lachaux/jsoncache'
+import fs                              from 'fs'
 
 export const displaySupremeController = {
 
@@ -139,6 +140,22 @@ export const displaySupremeController = {
         let drops       = JSON.parse(fs.readFileSync(`${jsonCache.path}drops/${cachePath}`))
         
         response.render('components/drops', { drops: drops })
+    },
+
+    async GET_Config(request, response) {
+        let configId = request.params.id
+        let config   = Config.get(configId)
+
+        response.render('components/config', { config: config })
+    },
+
+    async POST_Config(request, response) {
+        let configId    = request.params.id
+        let payload    = request.body
+        let success    = Config.update(configId, payload)
+
+
+        response.send(JSON.stringify({success: success}))
     }
     
 }

@@ -1,8 +1,51 @@
 const app       = require('./app')
 const alerte    = require('./alerte')
 
+/**
+ * permet d'intéragir avec le panier et sa modal
+ * 
+ * @author Julien Lachaux
+ */
 const panier = {
+    /**
+     * ============
+     * CONSTANTES *
+     * ============
+     * 
+     * constantes de ciblage des elements du dom
+     * 
+     * @property MODALS_CONTAINER   - container des modals
+     * @property DOM_ELEMENT        - panier
+     */
+    MODALS_CONTAINER:   'section.modals',
+    DOM_ELEMENT:        'div#panier',
 
+    /**
+     * constantes de messages d'erreurs
+     * 
+     * @property {object}   ERRORS_MESSAGES             - tableau de message d'erreurs
+     * @property {string}   ERRORS_MESSAGES.DEFAULT     - message d'erreur par defaut
+     */
+    ERRORS_MESSAGES:    {
+                            DEFAULT:        'Une erreur s\'est produite !'
+                        },
+
+    /**
+     * constantes de messages de succes
+     * 
+     * @property {object}   SUCCESS_MESSAGES                    - tableau de message de succes
+     * @property {string}   SUCCESS_MESSAGES.ADD_ARTICLE        - message de succes de l'ajout d'un article dans le panier
+     * @property {string}   SUCCESS_MESSAGES.REMOVE_ARTICLE     - message de succes de la suppression d'un article dans le panier
+     */
+    SUCCESS_MESSAGES:   {
+                            ADD_ARTICLE:    'Article ajouté au panier =)',
+                            REMOVE_ARTICLE: 'Article supprimé du panier'
+                        },
+
+    /**
+     * @name activePanier
+     * @description active le système de panier
+     */
     activePanier() {
         // activation bouton ajout article dans le panier
         $('button.ajoutPanier').each((index, element) => {
@@ -20,15 +63,24 @@ const panier = {
         })
     },
 
+    /**
+     * @name getPanier
+     * @description ouvre la modal de panier
+     */
     getPanier() {
         app.get('/widgets/getPanier', (response) => {
-            $('section.content').append(response)
-            $('div#panier').modal('show')
+            $(this.MODALS_CONTAINER).append(response)
+            $(this.DOM_ELEMENT).modal('show')
+
             this.activerRemovePanier()
             this.activerRemoveArticle()
         })
     },
 
+    /**
+     * @name getSizePanier
+     * @description met à jour la taille du panier dans la navbar
+     */
     getSizePanier() {
         app.get('/widgets/getSizePanier', (response) => {
             response = JSON.parse(response)
@@ -36,35 +88,66 @@ const panier = {
         })
     },
 
+    /**
+     * @name getTotalPrice
+     * @description met à jour le prix total du panier /!\ ( en euros ) /!\
+     */
+    getTotalPrice() {
+        app.get('/widgets/getTotalPrice', (response) => {
+            response = JSON.parse(response)
+            $('span.total').html(response.panier.total)
+        })
+    },
+
+    /**
+     * @name activerRemovePanier
+     * @description active les boutons de sortie de la modal panier
+     */
     activerRemovePanier() {
-        $('div#panier').on('hidden.bs.modal', (e) => {
-            removePanier.modal('dispose')
+        $(this.DOM_ELEMENT).on('hidden.bs.modal', (e) => {
+            this.removePanier()
         })
 
         $('.removePanier').each((index, element) => {
             element = $(element)
             element.click(e => {
-                this.removePanier()
+                panier.removePanier()
             })
         })
     },
 
+    /**
+     * @name removePanier
+     * @description supprime la modal panier
+     */
     removePanier() {
-        $('div#panier').modal('dispose')
+        $(this.DOM_ELEMENT).remove()
     },
 
+    /**
+     * @name addArticle
+     * @description ajoute un article au panier
+     * 
+     * @param {number} id 
+     */
     addArticle(id) {
         app.get('/widgets/addArticle/' + id, (response) => {
             response = JSON.parse(response)
+
             if (response.success) {
-                alerte.success('Article ajouter avec success =)')
+                alerte.success(this.SUCCESS_MESSAGES.ADD_ARTICLE)
                 this.getSizePanier()
+                this.getTotalPrice()
             } else {
-                alerte.error('Une erreur c\'est produite !')
+                alerte.error(this.ERRORS_MESSAGES.DEFAULT)
             }
         })
     },
 
+    /**
+     * @name activerRemoveArticle
+     * @description active les boutons de suppression de l'article du panier
+     */
     activerRemoveArticle() {
         $('.removeArticle').each((index, element) => {
             element = $(element)
@@ -75,11 +158,24 @@ const panier = {
         })
     },
 
+    /**
+     * @name removeArticle
+     * @description supprime un article du panier
+     * 
+     * @param {number} id 
+     */
     removeArticle(id) {
         app.get('/widgets/removeArticle/' + id, (response) => {
             response = JSON.parse(response)
-            $('[data-ligne="' + id + '"]').remove()
-            this.getSizePanier()
+
+            if (response.success) {
+                alerte.success(this.SUCCESS_MESSAGES.REMOVE_ARTICLE)
+                $('[data-ligne="' + id + '"]').remove()
+                this.getSizePanier()
+                this.getTotalPrice()
+            } else {
+                alerte.error(this.ERRORS_MESSAGES.DEFAULT)
+            }
         })
     }
 

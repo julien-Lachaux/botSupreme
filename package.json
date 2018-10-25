@@ -26,6 +26,7 @@
   "dependencies": {
     "@julien-lachaux/jsoncache": "^1.0.2",
     "@julien-lachaux/webscrapper": "^1.0.6",
+    "body-parser": "^1.18.3",
     "css-loader": "^1.0.0",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
