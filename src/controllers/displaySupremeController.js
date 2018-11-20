@@ -1,152 +1,74 @@
+import fs                              from 'fs'
 import { scrapperSupremeController }   from './scrapperSupremeController';
 import { Config }                       from './../class/Config';
-import { jsonCache }                   from '@julien-lachaux/jsoncache'
-import fs                              from 'fs'
+import { Utils }                       from '../class/Utils';
+import { Drop } from '../models/Drop';
+import { Article } from '../models/Article';
 
 export const displaySupremeController = {
 
-    async GET_ArticlesList(request, response) {
-        let cachePath = await jsonCache.getMostRecentFile('articles')
-        let articlesBrut = JSON.parse(fs.readFileSync(`${jsonCache.path}articles/${cachePath}`))
-
-        var categories = []
-        var articles = []
-
-        articlesBrut.forEach(articleBrut => {
-            let articleData = articles.find(e => {
-                return e.name === articleBrut.name
-            })
-            if (articleData !== undefined) {
-                let model = {
-                    model: articleBrut.model,
-                    img: articleBrut.img,
-                    url: articleBrut.url,
-                    sizes: articleBrut.sizes,
-                    sold_out: articleBrut.sold_out
-                }
-                if (articles.find(e => {
-                    return ((e.name === articleBrut.name) && (e.sold_out === false))
-                }) === undefined) {
-                    articleData.isFullSoldOut = true
-                } else {
-                    articleData.isFullSoldOut = true
-                }
-                articleData.models.push(model)
-            } else {
-                let article = {
-                    name: articleBrut.name,
-                    category: articleBrut.category,
-                    sold_out: articleBrut.sold_out,
-                    price: articleBrut.price,
-                    priceUnit: articleBrut.priceUnit,
-                    models: new Array({
-                        model: articleBrut.model,
-                        img: articleBrut.img,
-                        url: articleBrut.url,
-                        sizes: articleBrut.sizes,
-                        sold_out: articleBrut.sold_out,
-                        isFullSoldOut: articleBrut.sold_out ? true : false
-                    })
-                }
-
-                let category = categories.find(e => {
-                    return e.name === article.category
-                })
-                if (category === undefined) {
-                    categories.push({
-                        name: article.category,
-                        articles: []
-                    })
-                }
-                articles.push(article)
-            }
-        })
-
-        categories.forEach(element => {
-            console.log(element)
-            switch (element.name) {
-                case 'jackets':
-                    element.icon = 'Coat'
-                    element.default = true
-                    break;
-
-                case 'shirts':
-                    element.icon = 'Polo-Shirt'
-                    break;
-
-                case 'tops-sweaters':
-                    element.icon = 'Blouse'
-                    break;
-
-                case 'sweatshirts':
-                    element.icon = 'Hoodie'
-                    break;
-
-                case 'pants':
-                    element.icon = 'Jeans'
-                    break;
-
-                case 'shorts':
-                    element.icon = 'Short-Pants'
-                    break;
-
-                case 't-shirts':
-                    element.icon = 'T-Shirt'
-                    break;
-
-                case 'hats':
-                    element.icon = 'Cap-2'
-                    break;
-
-                case 'bags':
-                    element.icon = 'Bag'
-                    break;
-
-                case 'accessories':
-                    element.icon = 'Sunglasses'
-                    break;
-
-                case 'skate':
-                    element.icon = 'Skateboard-2'
-                    break;
-
-                case 'shoes':
-                    element.icon = 'Shoes'
-                    break;
-            }
-            element.articles = articles.filter(e => {
-                return e.category === element.name
-            })
-        });
-
-        let data = {
-            categories: categories
-        }
-
-        console.log(categories.length)
-
-        response.render('components/articlesList', data)
-    },
-
     async GET_manualScrapping(request, response) {
-        //await scrapperSupremeController.getArticlesList()
-        await scrapperSupremeController.getDropsList()
-
-        response.render('components/manualReload', {})
+        switch (request.params.action) {
+            case 'drops':
+                scrapperSupremeController.getDropsList()
+                break;
+            
+            case 'articles':
+                scrapperSupremeController.getArticlesList()
+                break;
+        }
+        response.send(JSON.stringify({
+            success: true,
+            message: `Scrapping ${request.params.action} list starting`
+        }))
     },
 
     async GET_DropsArticle(request, response) {
-        let cachePath   = await jsonCache.getMostRecentFile('drops')
-        let drops       = JSON.parse(fs.readFileSync(`${jsonCache.path}drops/${cachePath}`))
+        let data = {
+            drops: await Drop.findAll({
+                include: [{
+                    model: Article
+                }],
+                order: [['week', 'DESC']]
+            })
+        }
         
-        response.render('components/drops', { drops: drops })
+        response.render('components/drops', data)
     },
 
     async GET_Config(request, response) {
-        let configId = request.params.id
-        let config   = Config.get(configId)
+        let configId            = request.params.id
+        let config              = Config.get(configId)
+        let deliveryCountries  = Utils.getDeliveryCountries()
+        let paymentMethods     = Utils.getPaymentMethods()
 
-        response.render('components/config', { config: config })
+        deliveryCountries.forEach((currentCountry) => {
+            if (currentCountry.value === config.livraison.pays) {
+                currentCountry.selected = true
+            }
+
+            if (currentCountry.value === 'FR') {
+                currentCountry.default = true
+            }
+        })
+
+        paymentMethods.forEach((paymentMethod) => {
+            if (paymentMethod.value === config.CB.typeCB) {
+                paymentMethod.selected = true
+            }
+
+            if (paymentMethod.value === 'master') {
+                paymentMethod.default = true
+            }
+        })
+
+        let data    = {
+                        config:                 config,
+                        deliveryCountries:     deliveryCountries,
+                        paymentMethods:        paymentMethods,
+                    }
+
+        response.render('components/config', data)
     },
 
     async POST_Config(request, response) {
@@ -156,6 +78,19 @@ export const displaySupremeController = {
 
 
         response.send(JSON.stringify({success: success}))
-    }
+    },
+
+    async GET_ControlePanel(request, response) {
+
+        response.render('components/controlPanel', {})
+    },
+
+    async GET_Login(request, response) {
+        response.render('components/userLoginForm', {})
+    },
+
+    async GET_Register(request, response) {
+        response.render('components/userRegisterForm', {})
+    },
     
 }

@@ -28,5 +28,65 @@ export const Utils = {
             french: french,
             english: english
         }
+    },
+
+    getDeliveryCountries() {
+        return [
+            this.addDeliveryCountry('GB', 'UK'),
+            this.addDeliveryCountry('NB', 'UK (N. IRELAND)'),
+            this.addDeliveryCountry('AT', 'AUSTRIA'),
+            this.addDeliveryCountry('BY', 'BELARUS'),
+            this.addDeliveryCountry('BE', 'BELGIUM'),
+            this.addDeliveryCountry('BG', 'BULGARIA'),
+            this.addDeliveryCountry('HR', 'CROATIA'),
+            this.addDeliveryCountry('CZ', 'CZECH REPUBLIC'),
+            this.addDeliveryCountry('EE', 'DENMARK'),
+            this.addDeliveryCountry('FI', 'FINLAND'),
+            this.addDeliveryCountry('FR', 'FRANCE'),
+            this.addDeliveryCountry('DE', 'GERMANY'),
+            this.addDeliveryCountry('GR', 'GREECE'),
+            this.addDeliveryCountry('HU', 'HUNGARY'),
+            this.addDeliveryCountry('IS', 'ICELAND'),
+            this.addDeliveryCountry('IE', 'IRELAND'),
+            this.addDeliveryCountry('IT', 'ITALY'),
+            this.addDeliveryCountry('LV', 'LATVIA'),
+            this.addDeliveryCountry('LT', 'LITHUANIA'),
+            this.addDeliveryCountry('LU', 'LUXEMBOURG'),
+            this.addDeliveryCountry('MC', 'MONACO'),
+            this.addDeliveryCountry('NL', 'NETHERLANDS'),
+            this.addDeliveryCountry('NO', 'NORWAY'),
+            this.addDeliveryCountry('PL', 'POLAND'),
+            this.addDeliveryCountry('PT', 'PORTUGAL'),
+            this.addDeliveryCountry('RO', 'ROMANIA'),
+            this.addDeliveryCountry('RU', 'RUSSIA'),
+            this.addDeliveryCountry('SK', 'SLOVAKIA'),
+            this.addDeliveryCountry('SI', 'SLOVENIA'),
+            this.addDeliveryCountry('ES', 'SPAIN'),
+            this.addDeliveryCountry('SE', 'SWEDEN'),
+            this.addDeliveryCountry('CH', 'SWITZERLAND'),
+            this.addDeliveryCountry('TR', 'TURKEY')
+        ]
+    },
+
+    addDeliveryCountry(value, name) {
+        return {
+            value:  value,
+            name:   name
+        }
+    },
+
+    getPaymentMethods() {
+        return [
+            this.addPaymentMethod('visa', 'Visa'),
+            this.addPaymentMethod('master', 'Mastercard'),
+            this.addPaymentMethod('american_express', 'American Express')
+        ]
+    },
+
+    addPaymentMethod(value, name) {
+        return {
+            value:  value,
+            name:   name
+        }
     }
 }

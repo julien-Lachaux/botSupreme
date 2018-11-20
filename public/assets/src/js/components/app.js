@@ -29,6 +29,23 @@ const app = {
     },
 
     /**
+     * activeAjaxLink
+     * @description actives les ajax-link
+     * @param {function} callback fonction executer au retour de l'appel ajax
+     */
+    activeAjaxLink(callback = () => {}) {
+        $('.ajaxLink').each((i, link) => {
+            link = $(link)
+            link.click((event) => {
+                let element = event.target
+                event.preventDefault()
+                element = $(element)
+                app.get(element.attr('href'), callback)
+            })
+        })
+    },
+
+    /**
      * serializeForm
      * @description serialize un formulaire en un tableau clé - valeur
      * @param {string} form selecteur css pour cibler le formulaire a serializer
