@@ -26,9 +26,7 @@ export const scrapperSupremeController = {
 
         // i = 1 car doublon sur le site du latest drop
         for (let i = 1; i < dropsScrap.length; i++) {
-            let displayI = (i - 1)
-            
-            if (i !== 1) {
+            if (i === 1) {
                 let drop = {
                     url:          await webScrapper.getElementData(dropsScrap[i], 'a.block', 'href'),
                     display_week: await webScrapper.getElementData(dropsScrap[i], 'h2')
@@ -42,25 +40,25 @@ export const scrapperSupremeController = {
                 let month     = months.find((element) => {
                     return element.english === dateArray[1]
                 }).number
-                let year        = '20' + dateArray[2]
-                drop.date       = new Date(year + '-' + month + '-' + day)
+                let year      = '20' + dateArray[2]
+                drop.date     = new Date(year + '-' + month + '-' + day)
                 
                 try {
-                    Log.success(displayI + ' drop scrapped on ' + (dropsScrap.length - 2))
-                    await Drop.findOrCreate({ where: { date: drop.date } })
-                    .spread((dropFromDb, created) => {
-                        if (created) {
-                            Log.notice(' * drop added to db')
-                        } else {
+                    Log.success(i + ' drop scrapped on ' + (dropsScrap.length - 2))
+                    await Drop.findOne({ where: { date: drop.date } })
+                    .then((dropFromDb, err) => {
+                        if (dropFromDb) {
                             Log.warning(' * drop already in db')
+                        } else {
+                            Drop.create(drop)
+                            Log.notice(' * drop added to db')
                         }
                         drops.push(dropFromDb)
                     })
                 }  catch (error) {
-                    Log.error('drop: ' + displayI + ' on ' + (dropsScrap.length - 2) + ' failed')
+                    Log.error('drop: ' + i + ' on ' + (dropsScrap.length - 1) + ' failed')
                 }
             }
-            
         }
         webScrapper.end()
         Log.blankLine()
@@ -91,71 +89,130 @@ export const scrapperSupremeController = {
             drops[index].articles = []
             
             for (let i = 0; i < articlesScrap.length; i++) {
-                let displayI    = i + 1
-                let articleId   = await articlesScrap[i].$eval('div.card-details', element => element.getAttribute('data-itemid'))
-                let dropId      = drops[index].id
-                let article     = await webScrapper.page.evaluate(() => {
-                    let article = {
-                        supreme_id:    null,
-                        drop_id:       null,
-                        category:      document.querySelector('p.category').innerText,
-                        name:          document.querySelector('h5.name.item-details').innerText,
-                        images:        null,
-                        detail_url:    null,
-                        price_euros:   null,
-                        price_dollars: document.querySelector('p.priceusd').innerText,
-                        note_ratio:    parseInt(document.querySelector('p.upvotesratio').innerText),
-                        note_positive: parseInt(document.querySelector('p.upvotes').innerText),
-                        note_negative: parseInt(document.querySelector('p.downvotes').innerText),
-                        description:   null
+                let displayI         = i + 1
+                let articleId        = await articlesScrap[i].$eval('div.card-details', element => element.getAttribute('data-itemid'))
+                let dropId           = drops[index].id
+                let articleCat       = await articlesScrap[i].$eval('p.category', element => element.innerText)
+                let articleDetailUrl = 'https://www.supremecommunity.com/season/itemdetails/' + articleId
+                
+
+                await webScrapper.subScrapping(articleDetailUrl)
+
+                // on récupères les details
+                let details = await webScrapper.sub.page.evaluate(() => {
+                    // nom + category + description
+                    let articleName        = document.querySelector('h4').innerText
+                    let articleDescription = document.querySelector('p.detail-desc i').innerText
+
+                    // options
+                    let optionsContainer  = document.querySelectorAll('ul.sc-tabs li')
+                    let optionsContainers = {
+                        notes:  optionsContainer[0],
+                        prices: optionsContainer[1],
+                        colors: optionsContainer[2],
+                        sizes:  optionsContainer[3]
                     }
-                    return article
-                })
 
-                article.supreme_id = articleId
-                article.detail_url = 'https://www.supremecommunity.com/season/itemdetails/' + articleId
+                    // notes
+                    let articleNotesPositive = parseInt(optionsContainers.notes.querySelector('p.upvotes').innerText)
+                    let articleNotesNegative = parseInt(optionsContainers.notes.querySelector('p.downvotes').innerText)
+                    let articleNotesRatio    = parseInt(articleNotesPositive / articleNotesNegative)
+                    
+                    // prices
+                    let priceDollars = optionsContainers.prices.querySelector('span.price-label:nth-child(1)')
+                    let priceEuros   = optionsContainers.prices.querySelector('span.price-label:nth-child(3)')
 
-                await webScrapper.subScrapping(article.detail_url)
+                    if (priceDollars !== null) {
+                        priceDollars = priceDollars.innerText.substring(2)
+                    } else {
+                        priceDollars = ''
+                    }
+                    if (priceEuros !== null) {
+                        priceEuros = priceEuros.innerText.substring(2)
+                    } else {
+                        priceEuros = ''
+                    }
 
-                try {
-                    let articleDetails    = (await webScrapper.getElementsArray('.detail-row', true))[0]
-                    let articlePriceEuros = await webScrapper.getElementData(articleDetails, 'span.price-label:nth-child(3)')
-
-                    article.images = await webScrapper.page.evaluate(() => {
-                        let images = []
-                        document.querySelectorAll('img').forEach((element) => {
-                            images.push(element.getAttribute('src'))
-                        })
-                        images = images.join('|')
-                        return images
+                    // colors
+                    var colors = []
+                    let colorsContainer = optionsContainers.colors.querySelectorAll('span.label')
+                    colorsContainer.forEach((element) => {
+                        colors.push(element.innerText)
                     })
-                    article.description = await webScrapper.getElementData(articleDetails, 'p.detail-desc i')
-                    article.price_euros = articlePriceEuros.substring(2)
-                    article.drop_id     = dropId
-                } catch (error) {
-                    Log.warning(' * no price found')   
-                }
+                    colors = colors.join('|')
 
+                    // sizes
+                    var sizes = []
+                    let sizesContainer = optionsContainers.sizes.querySelectorAll('th')
+                    sizesContainer.forEach((element, index) => {
+                        if (index > 0) { sizes.push(element.innerText) }
+                    })
+                    sizes = sizes.join('|')
+
+                    // images
+                    var images = []
+                    document.querySelectorAll('img').forEach((element) => {
+                        images.push(element.getAttribute('src'))
+                    })
+                    images = images.join('|')
+
+                    return {
+                        articleName:          articleName,
+                        articleDescription:   articleDescription,
+                        articleColors:        colors !== '' ? colors : null,
+                        articleSizes:         sizes !== '' ? sizes : null,
+                        articleImages:        images !== '' ? images : null,
+                        articlePriceEuros:    priceEuros !== '' ? priceEuros : null,
+                        articlePriceDollars:  priceDollars !== '' ? priceDollars : null,
+                        articleNotesPositive: articleNotesPositive,
+                        articleNotesNegative: articleNotesNegative,
+                        articleNotesRatio:    articleNotesRatio
+                    }
+                })
                 await webScrapper.destroySub()
 
+                // on met en forme l'article
+                let article     = {
+                    name:          details.articleName,
+                    category:      articleCat,
+                    description:   details.articleDescription,
+                    supreme_id:    articleId,
+                    drop_id:       dropId,
+                    detail_url:    'https://www.supremecommunity.com/season/itemdetails/' + articleId,
+                    images:        details.articleImages,
+                    colors:        details.articleColors,
+                    sizes:         details.articleSizes,
+                    note_negative: details.articleNotesNegative,
+                    note_positive: details.articleNotesPositive,
+                    note_ratio:    details.articleNotesRatio,
+                    price_euros:   details.articlePriceEuros,
+                    price_dollars: details.articlePriceDollars
+                }
+
                 try {
-                    await Article.findOrCreate({ where: { supreme_id: article.supreme_id } })
-                    .spread(async (articleFromDb, created) => {
+                    await Article.findOne({ where: { supreme_id: article.supreme_id } })
+                    .then(async (articleFromDb) => {
                         Log.success('article: ' + displayI + ' scrapped on ' + articlesScrap.length + ' success')
-                        if (created) {
-                            Log.notice(' * added to db')
-                        } else {
+                        if (article.price_euros === null) {
+                            Log.warning(' * no price found')
+                        }
+                        if (articleFromDb) {
                             Log.warning(' * already in db')
-                            try {
-                                await Article.update(article, { where: { supreme_id: article.supreme_id } })
-                                Log.notice(' * article data updated')
-                            } catch (error) {
-                                Log.error(' * article data update failed')
-                            }
-                            
+                            await Article.update(article, { where: { supreme_id: article.supreme_id } })
+                                         .then(async (result) => {
+                                             if (result) {
+                                                 Log.notice(' * article data updated')
+                                             } else {
+                                                 Log.err(' * article date update failed')
+                                             }
+                                         })
+                        } else {
+                            Article.create(article)
+                            Log.notice(' * added to db')
                         }
                     })
                 } catch (error) {
+                    console.log(error)
                     Log.error('article: ' + displayI + ' on ' + articlesScrap.length + ' failed')
                 }
             }

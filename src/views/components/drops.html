@@ -1,19 +1,10 @@
-<nav class="sommaire position-fixed">
-    <ul id="categoriesTablist" role="tablist" class="list-group">
-        {{#drops}}
-            <li class="catogoryLink"><a data-toggle="list" role="tab" aria-controls="list-{{ week }}" href="#list-{{ week }}" id="list-{{ week }}-list">{{ week }}</a></li>
-        {{/drops}}
-    </ul>
-</nav>
-
-<div class="subContent tab-content" id="categoriesTabContent">
-    {{#drops}}
-        <div class="articlesArea tab-pane fade" id="list-{{ week }}" role="tabpanel" aria-labelledby="list-{{ week }}-list">
+<div class="subContent">
+    {{#drop}}
+        <div class="articlesArea" id="list-{{ week }}">
             <h2 id="{{ display_week }}">{{ display_week }}</h2>
             <div class="articles">
                 {{#articles}}
                     <div class="article">
-                        <div class="thumbnail"><img src="{{ img }}" alt=""></div>
                         <div class="articleInfo">
                             <div class="infoPlus">
                                 <div class="category">{{ category }}</div>
@@ -23,12 +14,40 @@
                                     <div class="ratio"><span class="badge badge-primary">{{ note_ratio }} % de votes positif</span></div>
                                     <div class="chiffre"><span class="badge badge-success">{{ note_positive }}</span>&nbsp;<span class="badge badge-danger">{{ note_negative }}</span></div>
                                 </div>
+                                <div class="options">
+                                    <ul class="colors">
+                                        {{#colors}}
+                                            <li class="color">{{colors}}</li>
+                                        {{/colors}}
+                                    </ul>
+                                    <ul class="sizes">
+                                        {{#sizes}}
+                                            <li class="size">{{sizes}}</li>
+                                        {{/sizes}}
+                                    </ul>
+                                </div>
                                 <button type="button" class="btn btn-outline-primary ajoutPanier" id="{{ supreme_id }}">Ajouter au panier</button>
+                            </div>
+                        </div>
+                        <div class="articleImages">
+                            <div id="articles_images-{{supreme_id}}" class="carousel slide" data-ride="carousel">
+                                <ol class="carousel-indicators">
+                                    {{#images}}
+                                        <li data-target="#articles_images-{{supreme_id}}" data-slide-to="{{index}}" {{#active}}class="active"{{/active}}></li>
+                                    {{/images}}
+                                </ol>
+                                <div class="carousel-inner">
+                                    {{#images}}
+                                        <div class="carousel-item {{#active}}active{{/active}}">
+                                            <img class="d-block w-100" src="https://www.supremecommunity.com{{src}}" alt="{{index}} article image">
+                                        </div>
+                                    {{/images}}
+                                </div>
                             </div>
                         </div>
                     </div>
                 {{/articles}}
             </div>
         </div>
-    {{/drops}}
+    {{/drop}}
 </div>

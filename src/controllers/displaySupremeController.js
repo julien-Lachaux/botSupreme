@@ -2,8 +2,8 @@ import fs                              from 'fs'
 import { scrapperSupremeController }   from './scrapperSupremeController';
 import { Config }                       from './../class/Config';
 import { Utils }                       from '../class/Utils';
-import { Drop } from '../models/Drop';
-import { Article } from '../models/Article';
+import { Drop }                        from '../models/Drop';
+import { Article }                     from '../models/Article';
 
 export const displaySupremeController = {
 
@@ -24,13 +24,36 @@ export const displaySupremeController = {
     },
 
     async GET_DropsArticle(request, response) {
-        let data = {
-            drops: await Drop.findAll({
-                include: [{
-                    model: Article
-                }],
-                order: [['week', 'DESC']]
+        let drops = await Drop.findAll({
+            include: [{
+                model: Article
+            }],
+            order: [['week', 'DESC']]
+        })
+        let lastDrop = drops[0]
+        lastDrop.articles.forEach((article) => {
+            // les images
+            let images = article.images.split('|')
+            article.images = []
+            images.forEach((image, index) => {
+                article.images.push({
+                    src: image,
+                    active: index === 0 ? true : false,
+                    index: index
+                })
             })
+
+            // colors
+            console.log(article.colors)
+            article.colors = article.colors !== null ? article.colors.split('|') : null
+            console.log(article.colors)
+            // sizes
+            article.sizes = article.sizes !== null ? article.sizes.split('|') : null
+        })
+
+        // data object
+        let data = {
+            drop: lastDrop
         }
         
         response.render('components/drops', data)
@@ -75,7 +98,6 @@ export const displaySupremeController = {
         let configId    = request.params.id
         let payload    = request.body
         let success    = Config.update(configId, payload)
-
 
         response.send(JSON.stringify({success: success}))
     },

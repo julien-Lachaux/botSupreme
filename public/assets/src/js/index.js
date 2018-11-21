@@ -23,6 +23,12 @@ app.get(endpoint, (response) => {
         && currentPage !== 'register'
     ) {
         panier.activePanier()
+        $('.carousel').each((i, carousel) => {
+            $(carousel).carousel({
+                interval: false,
+                ride:     false
+            })
+        })
         app.activeAjaxLink((response) => {
             console.log(response)
             if (response.success) {
