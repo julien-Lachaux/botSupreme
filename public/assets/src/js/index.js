@@ -1,5 +1,3 @@
-import './../scss/defaultStyle.scss';
-
 const app       = require('./components/app')
 const panier    = require('./components/panier')
 const alerte    = require('./components/alerte')
