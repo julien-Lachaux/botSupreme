@@ -12,7 +12,7 @@ export const Article = db.define('articles', {
         defaultValue: Sequelize.UUIDV1
     },
     supreme_id:     {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(10),
         allowNull: false,
         unique: 'compositeIndex'
     },
