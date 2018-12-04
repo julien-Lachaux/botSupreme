@@ -285,17 +285,24 @@ export const scrapperSupremeController = {
         articles = articles.filter(a => a.name === article.name)
 
         let colors = article.colors.split('|')
-        let sizes  = article.sizes.replace(/\s+/g, '').split('|')
+
+        if (article.sizes !== null &&article.sizes !== undefined) {
+            let sizes  = article.sizes.replace(/\s+/g, '').split('|')
+        }
 
         for (const i in colors) {
             var color        = colors[i]
             var articleCible = articles.find(a => a.color === color)
 
-            for (const u in sizes) {
-                let size = sizes[u]
-                let currentProcess = i + '-' + u
-
-                this.buy_final(articleCible.link, color, size, currentProcess)
+            if (sizes !== undefined) {
+                for (const u in sizes) {
+                    let size = sizes[u]
+                    let currentProcess = i + '-' + u
+    
+                    this.buy_final(articleCible.link, color, size, currentProcess)
+                }
+            } else {
+                this.buy_final(articleCible.link, color, false, currentProcess)
             }
         }
         
@@ -304,12 +311,13 @@ export const scrapperSupremeController = {
 
     async buy_final(articleUrl, color, size, processId) {
         const config       = Config.get(420)
-        const displayName = ` [${processId}] (${color} - ${size}) `
+        const displaySize = size !== flase ? size : 'unique'
+        const displayName = ` [${processId}] (${color} - ${displaySize}) `
 
         var timeStart = moment()
         var soldOut = false
 
-        switch (size) {
+        switch (displaySize) {
             case 'S':
                 size = 'Small'
                 break;
@@ -338,11 +346,11 @@ export const scrapperSupremeController = {
         // ajout au panier
         try {
             await scrapper.page.waitFor(100)
-            let inputValue = await scrapper.page.evaluate((size) => {
+            let inputValue = await scrapper.page.evaluate((displaySize) => {
                 let sizeInput    = document.querySelector('#size')
                 let sizesOptions = document.querySelectorAll('#size option')
                 
-                let valueInput   = sizesOptions.find(e => e.innerText === size)
+                let valueInput   = sizesOptions.find(e => e.innerText === displaySize)
 
                 if (valueInput !== undefined) {
                     sizeInput.value = valueInput.value
@@ -352,7 +360,7 @@ export const scrapperSupremeController = {
                     value: sizeInput.value,
                     input: valueInput
                 }
-            }, size)
+            }, displaySize)
             await scrapper.page.click('form.add input[type="submit"]')
             Log.success(displayName + ' -- article Ajouter au panier ')
         } catch (error) {
