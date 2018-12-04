@@ -285,16 +285,17 @@ export const scrapperSupremeController = {
         articles = articles.filter(a => a.name === article.name)
 
         let colors = article.colors.split('|')
+        var sizes  = false
 
-        if (article.sizes !== null &&article.sizes !== undefined) {
-            let sizes  = article.sizes.replace(/\s+/g, '').split('|')
+        if (article.sizes !== null && article.sizes !== undefined && article.sizes !== '') {
+            sizes = article.sizes.replace(/\s+/g, '').split('|')
         }
 
         for (const i in colors) {
             var color        = colors[i]
             var articleCible = articles.find(a => a.color === color)
 
-            if (sizes !== undefined) {
+            if (sizes !== false) {
                 for (const u in sizes) {
                     let size = sizes[u]
                     let currentProcess = i + '-' + u
