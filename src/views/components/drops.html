@@ -5,6 +5,22 @@
             <div class="articles">
                 {{#articles}}
                     <div class="article">
+                        <div class="articleImages">
+                            <div id="articles_images-{{supreme_id}}" class="carousel slide" data-ride="carousel">
+                                <ol class="carousel-indicators">
+                                    {{#images}}
+                                        <li data-target="#articles_images-{{supreme_id}}" data-slide-to="{{index}}" {{#active}}class="active"{{/active}}></li>
+                                    {{/images}}
+                                </ol>
+                                <div class="carousel-inner">
+                                    {{#images}}
+                                        <div class="carousel-item {{#active}}active{{/active}}">
+                                            <img class="d-block w-100" src="https://www.supremecommunity.com{{src}}" alt="{{index}} article image">
+                                        </div>
+                                    {{/images}}
+                                </div>
+                            </div>
+                        </div>
                         <div class="articleInfo">
                             <div class="infoPlus">
                                 <div class="category">{{ category }}</div>
@@ -27,22 +43,6 @@
                                     </ul>
                                 </div>
                                 <button type="button" class="btn btn-outline-primary ajoutPanier" id="{{ supreme_id }}">Ajouter au panier</button>
-                            </div>
-                        </div>
-                        <div class="articleImages">
-                            <div id="articles_images-{{supreme_id}}" class="carousel slide" data-ride="carousel">
-                                <ol class="carousel-indicators">
-                                    {{#images}}
-                                        <li data-target="#articles_images-{{supreme_id}}" data-slide-to="{{index}}" {{#active}}class="active"{{/active}}></li>
-                                    {{/images}}
-                                </ol>
-                                <div class="carousel-inner">
-                                    {{#images}}
-                                        <div class="carousel-item {{#active}}active{{/active}}">
-                                            <img class="d-block w-100" src="https://www.supremecommunity.com{{src}}" alt="{{index}} article image">
-                                        </div>
-                                    {{/images}}
-                                </div>
                             </div>
                         </div>
                     </div>

@@ -10,12 +10,12 @@
             <div class="modal-body p-0">
                 {{^panier.empty}}
                     <ul class="list-group p-0">
-                        {{#panier.articles}}
+                        {{#panier.lignes_paniers}}
                             <li class="list-group-item p-2" data-ligne="{{ id }}">
                                 <div class="row m-0">
-                                    <div class="col-2 lignePanier-img d-flex align-items-center justify-content-center"><img class="img-thumbnail rounded" src="{{ img }}" alt="{{ description }}"></div>
+                                    <div class="col-2 lignePanier-img d-flex align-items-center justify-content-center"><img class="img-thumbnail rounded" src="{{ images }}" alt=""></div>
                                     <div class="col-7 lignePanier-name text-truncate d-flex align-items-center justify-content-start">{{ name }}</div>
-                                    <div class="col-2 lignePanier-price p-0 d-flex align-items-center justify-content-end">{{ price.euros }} €</div>
+                                    <div class="col-2 lignePanier-price p-0 d-flex align-items-center justify-content-end">{{ price_euros }} €</div>
                                     <div class="col-1 lignePanier-action p-0 d-flex align-items-center justify-content-center">
                                         <button type="button" class="close removeArticle" aria-label="Close">
                                             <span data-toggle="tooltip" data-placement="left" title="Supprimer l'article du panier" data-id="{{ id }}">&times;</span>
@@ -23,7 +23,7 @@
                                     </div>
                                 </div>
                             </li>
-                        {{/panier.articles}}
+                        {{/panier.lignes_paniers}}
                         <li class="list-group-item p-4 d-flex align-items-center justify-content-end">
                             <div class="lignePanier-total font-weight-bold">total: <span class="total">{{ panier.total }}</span> €</div>
                         </li>

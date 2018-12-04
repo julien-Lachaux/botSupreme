@@ -15,7 +15,7 @@ export const panierController = {
 
         let data = {
             panier: {
-                size: panier.lignes_paniers.length
+                size: (panier !== null && panier.lignes_paniers.length > 0) ? panier.lignes_paniers.length : 0
             }
         }
         
@@ -33,14 +33,27 @@ export const panierController = {
     },
 
     async GET_Panier(request, response) {
-        var data = {}
+        const currentUser = request.user
+        let panier = await Panier.findOne({
+            where: { user_id: currentUser.id },
+            include: [{
+                model: LignePanier
+            }]
+        })
 
-        if (PanierStore.checkIfExist()) {
-            data.panier = PanierStore.getPanier()
+        if (panier !== null && panier.lignes_paniers.lenght > 0) {
+            panier.lignes_paniers.forEach(ligne => {
+                ligne.images = ligne.images.split('|')
+                ligne.images = ligne.images.length > 0 ? ligne.images.split('|')[0] : null
+            });
         } else {
-            data.panier = {
+            panier = {
                 empty: true
             }
+        }
+
+        let data = {
+            panier: panier
         }
 
         response.render('components/panier', data)

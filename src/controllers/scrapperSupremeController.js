@@ -5,6 +5,8 @@ import { Config }        from '../class/Config';
 import { Drop }         from '../models/Drop';
 import { Article }      from '../models/Article';
 import { Log }          from '../class/Log'
+import { Panier } from '../models/Panier';
+import { LignePanier } from '../models/LignePanier';
 
 export const scrapperSupremeController = {
 
@@ -26,7 +28,7 @@ export const scrapperSupremeController = {
 
         // i = 1 car doublon sur le site du latest drop
         for (let i = 1; i < dropsScrap.length; i++) {
-            if (i === 1) {
+            if (i <= 2) {
                 let drop = {
                     url:          await webScrapper.getElementData(dropsScrap[i], 'a.block', 'href'),
                     display_week: await webScrapper.getElementData(dropsScrap[i], 'h2')
@@ -225,190 +227,250 @@ export const scrapperSupremeController = {
      * 
      * @return object
      */
-    async buyArticles() {
+    async buyArticles(userId) {
+        // init
         Log.title('BUYING ARTICLES')
-        var timeStart       = moment()
-        var config           = Config.get(420)
-        var panier          = PanierStore.getPanier()
-        var articlesCible   = PanierStore.articles
-        var result          = []
-    
-        if (config === false) {
-            Log.error('scrapping failed, config not found')
-            return 'Le panier est vide'
-        }
 
+        // panier + lignes panier
+        var panier = await Panier.findOne({
+            where: {
+                user_id: userId
+            },
+            include: [{
+                model: LignePanier
+            }]
+        })
+        
         if (panier === false) {
             Log.error('scrapping failed, basket not found')
             return 'Le panier est vide'
         }
 
-        Log.success('config loaded')
-        Log.success('panier loaded')
+        Log.success('articles to buy loaded')
 
-        let articlesCibleCategories = []
-        articlesCible.forEach((article, i) => {
-            articlesCibleCategories.push(article.category)
+        // articles cibles
+        Log.notice(`${panier.lignes_paniers.length} articles to buy`)
+
+        await panier.lignes_paniers.forEach(async (ligne) => {
+            let article = await Article.findOne({ where: { supreme_id: ligne.article_id } })
+            this.buyOneArticle(article)
         })
-        webScrapper.setUrl('https://www.supremenewyork.com/shop/all/' + articlesCibleCategories[0])
+
+        return true
+    },
+
+    async buyOneArticle(article) {
+        Log.notice(article.category + ' : ' + article.name)
+
+        let category = article.category === 'tops-sweaters' ? 'tops_sweaters' : article.category
+        webScrapper.setUrl('https://www.supremenewyork.com/shop/all/' + category)
         await webScrapper.init()
 
-        var articlesFinal = []
-        await articlesCibleCategories.forEach(async (category, i) => {
-            if (i !== 0) {
-                await webScrapper.goto('https://www.supremenewyork.com/shop/all/' + category)
-            }
-
-            let articles = await webScrapper.page.evaluate(() => {
-                var articlesScrapped = []
-                let articlesDomElements = document.querySelectorAll('article')
-                articlesDomElements.forEach(article => {
-                    articlesScrapped.push({
-                        name: article.querySelector('h1 a').innerText,
-                        color: article.querySelector('p a').innerText,
-                        link: article.querySelector('h1 a').getAttribute('href')
-                    })
+        let articles = await webScrapper.page.evaluate(() => {
+            var articlesScrapped = []
+            let articlesDomElements = document.querySelectorAll('article')
+            articlesDomElements.forEach(article => {
+                articlesScrapped.push({
+                    name: article.querySelector('h1 a').innerText,
+                    color: article.querySelector('p a').innerText,
+                    link: article.querySelector('h1 a').getAttribute('href')
                 })
-                
-                return articlesScrapped
             })
-            Log.notice('https://www.supremenewyork.com/shop/all/' + category)
-            for (let article in articles) {
-                let test = articlesCible.find(articleCible => {
-                    return articleCible.name === article.name
-                })
-                if (test !== undefined) {
-                    articlesFinal.push(article)
-                } 
-            }
-
-            if (articlesFinal.length === articlesCible.length) {
-                return false;
-            }
-
-        });
-        
-        let ScrappedArticlesUrl = await webScrapper.page.evaluate(() => {
-            var articlesUrl = []
-            document.querySelectorAll('#container article a').forEach((articleLink) => {
-                articlesUrl.push(articleLink.getAttribute('href'))
-            })
-
-            return articlesUrl
+            
+            return articlesScrapped
         })
 
-        for (let i = 0; i < ScrappedArticlesUrl.length; i++) {
-            let url = ScrappedArticlesUrl[i]
-            Utils.log(i + ' - ' + url)
-            await webScrapper.goto('https://www.supremenewyork.com' + url)
-            
-            // ajout au panier
-            try {
-                await webScrapper.page.waitFor(100)
-                await webScrapper.page.click('form.add input[type="submit"]')
-                Log.success(' -- article Ajouter au panier ')
-            } catch (error) {
-                Log.error(' -- article SOLDOUT ')
-            }
-        }
-
-        Log.notice('Start basket validation script')
-
-        await webScrapper.page.waitFor(100)
-
-        // on verifie le panier
-        await webScrapper.goto('https://www.supremenewyork.com/shop/cart')
-
-        var panierSiteArticles = await webScrapper.getElementsArray('#cart-body tr', false)
-        if (panierSiteArticles.length > 0) {
-            // phase de paiement
-            await webScrapper.goto('https://www.supremenewyork.com/checkout')
-            await webScrapper.page.waitFor(100)
-
-            let form = await webScrapper.page.evaluate((config) => {
-                let form = {
-                    livraison: {
-                        name:        document.querySelector('input[name="order[billing_name]"]'),
-                        mail:        document.querySelector('input[name="order[email]"]'),
-                        tel:         document.querySelector('input[name="order[tel]"]'),
-                        adresse_1:   document.querySelector('input[name="order[billing_address]"]'),
-                        adresse_2:   document.querySelector('input[name="order[billing_address_2]"]'),
-                        adresse_3:   document.querySelector('input[name="order[billing_address_3]"]'),
-                        ville:       document.querySelector('#order_billing_city'),
-                        code_postal: document.querySelector('#order_billing_zip'),
-                        pays:        document.querySelector('#order_billing_country')
-                    },
-                    paiement: {
-                        CB_type:   document.querySelector('#credit_card_type'),
-                        CB_numero: document.querySelector('#cnb'),
-                        visuel:    document.querySelector('#vval'),
-                        expiration: {
-                            mois:  document.querySelector('#credit_card_month'),
-                            annee: document.querySelector('#credit_card_year')
-                        }
-                    },
-                    terms: document.querySelector('#order_terms')
-                }
-                // on saisie les informations de livraison
-                form.livraison.name.value           = config.nom
-                form.livraison.tel.value            = config.tel
-                form.livraison.mail.value           = config.email
-                form.livraison.pays.value           = config.livraison.pays
-                form.livraison.ville.value          = config.livraison.ville
-                form.livraison.adresse_1.value      = config.livraison.adresse
-                form.livraison.adresse_2.value      = config.livraison.complement_1
-                form.livraison.adresse_3.value      = config.livraison.complement_2
-                form.livraison.code_postal.value    = config.livraison.code_postal
-
-                // puis les informations de paiement
-                form.paiement.CB_type.value             = config.CB.typeCB
-                form.paiement.CB_numero.value           = config.CB.numero
-                form.paiement.visuel.value              = config.CB.visuel
-                form.paiement.expiration.mois.value     = config.CB.exp_mois
-                form.paiement.expiration.annee.value    = config.CB.exp_annee
-
-                // on coche les termes et condiftions
-                form.terms.value = 1
-
-                return {
-                    livraison: {
-                        name:        form.livraison.name.value,
-                        mail:        form.livraison.mail.value,
-                        tel:         form.livraison.tel.value,
-                        adresse_1:   form.livraison.adresse_1.value,
-                        adresse_2:   form.livraison.adresse_2.value,
-                        adresse_3:   form.livraison.adresse_3.value,
-                        ville:       form.livraison.ville.value,
-                        code_postal: form.livraison.code_postal.value,
-                        pays:        form.livraison.pays.value
-                    },
-                    paiement: {
-                        CB_type:   form.paiement.CB_type.value,
-                        CB_numero: form.paiement.CB_numero.value,
-                        visuel:    form.paiement.visuel.value,
-                        expiration: {
-                            mois:  form.paiement.expiration.mois.value,
-                            annee: form.paiement.expiration.annee.value
-                        }
-                    }
-                }
-            }, config)
-
-            Utils.log(form)
-
-            // validation de la commande
-            // await webScrapper.page.click('#pay input[type="submit"]')
-            Log.success('Articles Buy')
-        }
-
-        // fin du scrapping
         await webScrapper.end()
 
-        let timeEnd             = moment()
-        let scrappingDuration   = moment.duration(timeEnd.diff(timeStart)).asSeconds()
+        articles = articles.filter(a => a.name === article.name)
 
-        Log.notice('duration: ' + scrappingDuration + ' secondes')
+        let colors = article.colors.split('|')
+        let sizes  = article.sizes.replace(/\s+/g, '').split('|')
 
-        return result
+        for (const i in colors) {
+            var color        = colors[i]
+            var articleCible = articles.find(a => a.color === color)
+
+            for (const u in sizes) {
+                let size = sizes[u]
+                let currentProcess = i + '-' + u
+
+                this.buy_final(articleCible.link, color, size, currentProcess)
+            }
+        }
+        
+        return 0;
+    },
+
+    async buy_final(articleUrl, color, size, processId) {
+        const config       = Config.get(420)
+        const displayName = ` [${processId}] (${color} - ${size}) `
+
+        var timeStart = moment()
+        var soldOut = false
+
+        switch (size) {
+            case 'S':
+                size = 'Small'
+                break;
+        
+            case 'M':
+                size = 'Medium'
+                break;
+
+            case 'L':
+                size = 'Large'
+                break;
+
+            case 'XL':
+                size = 'XLarge'
+                break;
+        }
+
+        function bestCopyEver(src) {
+            return Object.assign({}, src);
+        }
+        var scrapper = bestCopyEver(webScrapper)
+
+        scrapper.setUrl('https://www.supremenewyork.com' + articleUrl)
+        await scrapper.init()
+
+        // ajout au panier
+        try {
+            await scrapper.page.waitFor(100)
+            let inputValue = await scrapper.page.evaluate((size) => {
+                let sizeInput    = document.querySelector('#size')
+                let sizesOptions = document.querySelectorAll('#size option')
+                
+                let valueInput   = sizesOptions.find(e => e.innerText === size)
+
+                if (valueInput !== undefined) {
+                    sizeInput.value = valueInput.value
+                }
+
+                return {
+                    value: sizeInput.value,
+                    input: valueInput
+                }
+            }, size)
+            await scrapper.page.click('form.add input[type="submit"]')
+            Log.success(displayName + ' -- article Ajouter au panier ')
+        } catch (error) {
+            soldOut = true
+            Log.error(displayName + ' -- article SOLDOUT ')
+        }
+
+        if (soldOut === false) {
+            await scrapper.page.waitFor(100)
+    
+            // on verifie le panier
+            await scrapper.goto('https://www.supremenewyork.com/shop/cart')
+    
+            var panierSiteArticles = await scrapper.getElementsArray('#cart-body tr', false)
+            if (panierSiteArticles.length > 0) {
+                // phase de paiement
+                await scrapper.goto('https://www.supremenewyork.com/checkout')
+                await scrapper.page.waitFor(100)
+
+                let form = await scrapper.page.evaluate((config) => {
+                    // contourner le captcha
+                    document.querySelector('div.g-recaptcha').remove()
+
+                    // remplir formulaire de paiement
+                    let form = {
+                        livraison: {
+                            name:        document.querySelector('input[name="order[billing_name]"]'),
+                            mail:        document.querySelector('input[name="order[email]"]'),
+                            tel:         document.querySelector('input[name="order[tel]"]'),
+                            adresse_1:   document.querySelector('input[name="order[billing_address]"]'),
+                            adresse_2:   document.querySelector('input[name="order[billing_address_2]"]'),
+                            adresse_3:   document.querySelector('input[name="order[billing_address_3]"]'),
+                            ville:       document.querySelector('#order_billing_city'),
+                            code_postal: document.querySelector('#order_billing_zip'),
+                            pays:        document.querySelector('#order_billing_country')
+                        },
+                        paiement: {
+                            CB_type:   document.querySelector('#credit_card_type'),
+                            CB_numero: document.querySelector('#cnb'),
+                            visuel:    document.querySelector('#vval'),
+                            expiration: {
+                                mois:  document.querySelector('#credit_card_month'),
+                                annee: document.querySelector('#credit_card_year')
+                            }
+                        },
+                        terms:           document.querySelector('#order_terms'),
+                        termsValidation: document.querySelector('input[name="order[terms]"]')
+                    }
+                    // on saisie les informations de livraison
+                    form.livraison.name.value        = config.nom + ' ' + config.prenom
+                    form.livraison.tel.value         = config.tel
+                    form.livraison.mail.value        = config.email
+                    form.livraison.pays.value        = config.livraison.pays
+                    form.livraison.ville.value       = config.livraison.ville
+                    form.livraison.adresse_1.value   = config.livraison.adresse
+                    form.livraison.adresse_2.value   = config.livraison.complement_1
+                    form.livraison.adresse_3.value   = config.livraison.complement_2
+                    form.livraison.code_postal.value = config.livraison.code_postal
+    
+                    // puis les informations de paiement
+                    form.paiement.CB_type.value          = config.CB.typeCB
+                    form.paiement.CB_numero.value        = config.CB.numero
+                    form.paiement.visuel.value           = config.CB.visuel
+                    form.paiement.expiration.mois.value  = config.CB.exp_mois
+                    form.paiement.expiration.annee.value = config.CB.exp_annee
+    
+                    // on coche les termes et condiftions
+                    form.terms.value           = 1
+                    form.termsValidation.value = 1
+                    
+                    return {
+                        livraison: {
+                            name:        form.livraison.name.value,
+                            mail:        form.livraison.mail.value,
+                            tel:         form.livraison.tel.value,
+                            adresse_1:   form.livraison.adresse_1.value,
+                            adresse_2:   form.livraison.adresse_2.value,
+                            adresse_3:   form.livraison.adresse_3.value,
+                            ville:       form.livraison.ville.value,
+                            code_postal: form.livraison.code_postal.value,
+                            pays:        form.livraison.pays.value
+                        },
+                        paiement: {
+                            CB_type:   form.paiement.CB_type.value,
+                            CB_numero: form.paiement.CB_numero.value,
+                            visuel:    form.paiement.visuel.value,
+                            expiration: {
+                                mois:  form.paiement.expiration.mois.value,
+                                annee: form.paiement.expiration.annee.value
+                            }
+                        }
+                    }
+                }, config)
+    
+                // pour controler les valeurs rentrer dans le form de paiement
+                // Utils.log(form)
+    
+                // validation de la commande
+                await scrapper.page.click('#pay input[type="submit"]')
+                try {
+                    await scrapper.page.waitFor(100)
+                } catch (error) {
+                    Log.error(error.message)
+                }
+                Log.success(displayName + ' -- article buy')
+            } else {
+                Log.error(displayName + ' -- article not buy')
+            }
+            await scrapper.page.screenshot({ path: "temp/screenshot_" + processId + "_.png" })
+        }
+
+        let timeEnd           = moment()
+        let scrappingDuration = moment.duration(timeEnd.diff(timeStart)).asSeconds()
+
+        Log.notice(displayName + ' -- finished: ' + scrappingDuration + ' secondes')
+        
+        await scrapper.end()
+
+        return scrappingDuration
     }
 }

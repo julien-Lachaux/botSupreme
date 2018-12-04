@@ -23,6 +23,15 @@ export const displaySupremeController = {
         }))
     },
 
+    async GET_buyArticles(request, response) {
+        scrapperSupremeController.buyArticles(request.user.id)
+
+        response.send(JSON.stringify({
+            success: true,
+            message: `Buy article process starting`
+        }))
+    },
+
     async GET_DropsArticle(request, response) {
         let drops = await Drop.findAll({
             include: [{

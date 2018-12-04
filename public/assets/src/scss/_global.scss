@@ -4,6 +4,10 @@ body {
     background: rgb(248, 248, 248);
 }
 
+.zindex-modal {
+    z-index: 1050 !important;
+}
+
 .supreme {
     background: #dd1300;
     color: #fff;

@@ -12,7 +12,7 @@ router.post('/update_configuration/:id', displaySupremeController.POST_Config)
 
 // commande manuel
 router.get('/manualReload/:action', displaySupremeController.GET_manualScrapping)
-router.get('/buyArticles', scrapperSupremeController.buyArticles)
+router.get('/buyArticles', displaySupremeController.GET_buyArticles)
 
 // drops
 router.get('/get_drops', displaySupremeController.GET_DropsArticle)
