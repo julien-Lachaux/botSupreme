@@ -9,9 +9,9 @@
     "devApi": "nodemon --ignore 'data/*' --exec babel-node src/index.js",
     "devFront": "webpack --watch",
     "build": "npm run clean && npm run build-babel",
-    "start": "babel-node src/index.js",
+    "start": "node ./build/index.js",
     "test": "echo \"no test specified !\"",
-    "production": "git pull && forever start build/index.js"
+    "production": "git pull && npm run build && forever start build/index.js"
   },
   "repository": {
     "type": "git",

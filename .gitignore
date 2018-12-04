@@ -3,4 +3,5 @@
 /.env
 /temp
 /data
+/build
 *.DS_Store

@@ -228,7 +228,7 @@ cronsTable.scrapSupremeArticles = cron.schedule('0 30 23 * * * *', () => {
 Log.success(" * cron scrapping articles declared")
 
 // lance les achats au debut des drops
-cronsTable.buyArticles = cron.schedule('1 0 12 * * tuesday', () => {
+cronsTable.buyArticles = cron.schedule('2 0 12 * * tuesday', () => {
     scrapperSupremeController.buyArticles()
 }, {
     scheduled: false
