@@ -7,8 +7,8 @@ import bodyParser                       from 'body-parser'
 let router = express.Router()
 
 // configuration
-router.get('/get_configuration/:id', displaySupremeController.GET_Config)
-router.post('/update_configuration/:id', displaySupremeController.POST_Config)
+router.get('/get_configuration', displaySupremeController.GET_Config)
+router.post('/update_configuration', displaySupremeController.POST_Config)
 
 // commande manuel
 router.get('/manualReload/:action', displaySupremeController.GET_manualScrapping)

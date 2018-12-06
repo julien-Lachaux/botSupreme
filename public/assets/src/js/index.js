@@ -8,10 +8,6 @@ var currentPage     = app.getCurrentPage()
 var endpoint        = ''
 
 switch (currentPage) {
-    case 'configuration':
-        endpoint = `/widgets/get_${currentPage}/420`
-        break;
-
     default:
         endpoint = `/widgets/get_${currentPage}`
         break;
@@ -41,8 +37,7 @@ app.get(endpoint, (response) => {
     if (currentPage === 'configuration') {
         $('#configForm').submit((e) => {
             let payload = app.serializeForm('#configForm', 'id')
-            console.log(payload.id)
-            app.post(`/widgets/update_configuration/${payload.id}`, payload, (response2) => {
+            app.post(`/widgets/update_configuration`, payload, (response2) => {
                 if(response2.success) {
                     alerte.success('Configuration mis à jour avec succès !')
                 } else {

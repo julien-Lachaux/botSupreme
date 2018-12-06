@@ -253,13 +253,13 @@ export const scrapperSupremeController = {
 
         await panier.lignes_paniers.forEach(async (ligne) => {
             let article = await Article.findOne({ where: { supreme_id: ligne.article_id } })
-            this.buyOneArticle(article)
+            this.buyOneArticle(article, userId)
         })
 
         return true
     },
 
-    async buyOneArticle(article) {
+    async buyOneArticle(article, userId) {
         Log.notice(article.category + ' : ' + article.name)
 
         let category = article.category === 'tops-sweaters' ? 'tops_sweaters' : article.category
@@ -300,18 +300,18 @@ export const scrapperSupremeController = {
                     let size = sizes[u]
                     let currentProcess = i + '-' + u
     
-                    this.buy_final(articleCible.link, color, size, currentProcess)
+                    this.buy_final(articleCible.link, color, size, currentProcess, userId)
                 }
             } else {
-                this.buy_final(articleCible.link, color, false, currentProcess)
+                this.buy_final(articleCible.link, color, false, currentProcess, userId)
             }
         }
         
         return 0;
     },
 
-    async buy_final(articleUrl, color, size, processId) {
-        const config       = Config.get(420)
+    async buy_final(articleUrl, color, size, processId, userId) {
+        const config       = Config.get(userId)
         const displaySize = size !== flase ? size : 'unique'
         const displayName = ` [${processId}] (${color} - ${displaySize}) `
 

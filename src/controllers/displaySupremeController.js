@@ -69,8 +69,8 @@ export const displaySupremeController = {
     },
 
     async GET_Config(request, response) {
-        let configId            = request.params.id
-        let config              = Config.get(configId)
+        let config              = Config.get(request.user.id)
+        console.log(config)
         let deliveryCountries  = Utils.getDeliveryCountries()
         let paymentMethods     = Utils.getPaymentMethods()
 
@@ -104,9 +104,8 @@ export const displaySupremeController = {
     },
 
     async POST_Config(request, response) {
-        let configId    = request.params.id
         let payload    = request.body
-        let success    = Config.update(configId, payload)
+        let success    = Config.update(request.user.id, payload)
 
         response.send(JSON.stringify({success: success}))
     },

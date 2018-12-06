@@ -5,9 +5,37 @@ export const Config = {
     DIRECTORY_PATH: 'data/configs',
 
     get(id) {
-        let path        = `${this.DIRECTORY_PATH}/user_${id}.json`
-        let configExist  = fs.existsSync(path)
-        let config       = configExist === true ? JSON.parse(fs.readFileSync(path)) : false
+        var config = {}
+        const path        = `${this.DIRECTORY_PATH}/user_${id}.json`
+        const configExist  = fs.existsSync(path)
+
+        if (configExist) {
+            config = JSON.parse(fs.readFileSync(path))
+        } else {
+            config = {
+                id: id,
+                nom: "",
+                prenom: "",
+                email: "",
+                tel: "",
+                livraison: {
+                    pays: "",
+                    code_postal: "",
+                    ville: "",
+                    adresse: "",
+                    complement_1: "",
+                    complement_2: ""
+                },
+                CB: {
+                    typeCB: "",
+                    numero: "",
+                    exp_mois: "",
+                    exp_annee: "",
+                    visuel: ""
+                }
+            }
+            this.update(id, config)
+        }
 
         return config
     },
