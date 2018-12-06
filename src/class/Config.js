@@ -5,15 +5,17 @@ export const Config = {
     DIRECTORY_PATH: 'data/configs',
 
     get(id) {
+        const path       = `${this.DIRECTORY_PATH}/user_${id}.json`
+        const configExist = fs.existsSync(path)
+
         var config = {}
-        const path        = `${this.DIRECTORY_PATH}/user_${id}.json`
-        const configExist  = fs.existsSync(path)
 
         if (configExist) {
             config = JSON.parse(fs.readFileSync(path))
         } else {
             config = {
                 id: id,
+                updated: false,
                 nom: "",
                 prenom: "",
                 email: "",
@@ -41,23 +43,25 @@ export const Config = {
     },
 
     update(id, payload) {
-        try {
-            let path = `${this.DIRECTORY_PATH}/user_${id}.json`
-            fs.writeFileSync(path, JSON.stringify(this.formatPayload(payload)))
-        } catch (error) {
-            console.log(error)
+        let path = `${this.DIRECTORY_PATH}/user_${id}.json`
+        fs.writeFileSync(path, JSON.stringify(payload))
+    },
 
-            return false
+    isUpdated(id) {
+        const config = this.get(id)
+        if (config.updated) {
+            return true
         }
-
-        return true
+        return false
     },
 
     formatPayload(payload) {
-        let date = payload.exp_mois.split('-')
+        console.log(payload)
+        let date = payload.exp_mois !== '' ? payload.exp_mois.split('-') : ['', '']
         let parsedPayload = {
             id:         payload.id,
             nom:        payload.nom,
+            updated:    payload.updated,
             prenom:     payload.prenom,
             email:      payload.email,
             tel:        payload.tel,

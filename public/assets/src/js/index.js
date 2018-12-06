@@ -26,7 +26,6 @@ app.get(endpoint, (response) => {
             })
         })
         app.activeAjaxLink((response) => {
-            console.log(response)
             if (response.success) {
                 alerte.success(response.message)
             } else {

@@ -240,7 +240,6 @@ export const scrapperSupremeController = {
                 model: LignePanier
             }]
         })
-        
         if (panier === false) {
             Log.error('scrapping failed, basket not found')
             return 'Le panier est vide'
@@ -294,16 +293,20 @@ export const scrapperSupremeController = {
         for (const i in colors) {
             var color        = colors[i]
             var articleCible = articles.find(a => a.color === color)
-
-            if (sizes !== false) {
-                for (const u in sizes) {
-                    let size = sizes[u]
-                    let currentProcess = i + '-' + u
-    
-                    this.buy_final(articleCible.link, color, size, currentProcess, userId)
+            
+            if (articleCible !== undefined) {
+                if (sizes !== false) {
+                    for (const u in sizes) {
+                        let size = sizes[u]
+                        let currentProcess = i + '-' + u
+        
+                        this.buy_final(articleCible.link, color, size, currentProcess, userId)
+                    }
+                } else {
+                    this.buy_final(articleCible.link, color, false, currentProcess, userId)
                 }
             } else {
-                this.buy_final(articleCible.link, color, false, currentProcess, userId)
+                Log.error('Article pas encore disponible')
             }
         }
         
@@ -312,7 +315,7 @@ export const scrapperSupremeController = {
 
     async buy_final(articleUrl, color, size, processId, userId) {
         const config       = Config.get(userId)
-        const displaySize = size !== flase ? size : 'unique'
+        const displaySize = size !== false ? size : 'unique'
         const displayName = ` [${processId}] (${color} - ${displaySize}) `
 
         var timeStart = moment()

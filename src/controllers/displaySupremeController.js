@@ -105,7 +105,7 @@ export const displaySupremeController = {
 
     async POST_Config(request, response) {
         let payload    = request.body
-        let success    = Config.update(request.user.id, payload)
+        let success    = Config.update(request.user.id, Config.formatPayload(payload))
 
         response.send(JSON.stringify({success: success}))
     },

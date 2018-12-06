@@ -228,8 +228,17 @@ cronsTable.scrapSupremeArticles = cron.schedule('0 30 23 * * * *', () => {
 Log.success(" * cron scrapping articles declared")
 
 // lance les achats au debut des drops
-cronsTable.buyArticles = cron.schedule('2 0 12 * * tuesday', () => {
-    scrapperSupremeController.buyArticles()
+cronsTable.buyArticles = cron.schedule('0 8 8 * * 4', async () => {
+    const paniers = await Panier.findAll()
+    Log.title('CRON SCRAPPING ARTICLES FOR DROP')
+    if (paniers.length === 0) {
+        Log.warning('Nothing to buy')
+    } else {
+        Log.notice(`${paniers.length} paniers found`)
+        paniers.forEach((panier) => {
+            scrapperSupremeController.buyArticles(panier.user_id)
+        })
+    }
 }, {
     scheduled: false
 })
